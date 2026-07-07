@@ -259,7 +259,7 @@ export default function CarForm({
             Fotos {totalPhotos > 0 && <span className="text-slate-400">({totalPhotos})</span>}
           </span>
           {totalPhotos > 1 && (
-            <span className="text-xs text-slate-400">Pasa el ratón y elige la portada</span>
+            <span className="text-xs text-slate-400">Marca la portada con ★</span>
           )}
         </div>
 
@@ -294,49 +294,54 @@ export default function CarForm({
         </div>
 
         {displayItems.length > 0 && (
-          <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {displayItems.map((it) => {
               const isCover = keyOf(it) === effectiveKey;
               const isNew = it.kind === 'new';
               return (
                 <div
                   key={keyOf(it)}
-                  className={`group relative aspect-square overflow-hidden rounded-lg border-2 transition ${
+                  className={`relative aspect-square overflow-hidden rounded-lg border-2 ${
                     isCover ? 'border-blue-600 ring-2 ring-blue-200' : 'border-slate-200'
                   }`}
                 >
                   <img src={it.url} alt="" className="h-full w-full object-cover" />
 
+                  {/* top-left tag */}
                   {isCover ? (
-                    <span className="absolute left-1 top-1 z-10 rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    <span className="absolute left-1 top-1 z-10 rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-medium text-white shadow">
                       ★ Portada
                     </span>
                   ) : (
+                    isNew && (
+                      <span className="absolute left-1 top-1 z-10 rounded bg-green-600 px-1.5 py-0.5 text-[10px] text-white shadow">
+                        Nueva
+                      </span>
+                    )
+                  )}
+
+                  {/* delete — always visible (tap-friendly on mobile) */}
+                  <button
+                    type="button"
+                    onClick={() => (it.kind === 'existing' ? deleteExisting(it.id) : removeNew(it.uid))}
+                    className="absolute right-1 top-1 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/65 text-sm text-white shadow transition hover:bg-red-600"
+                    aria-label="Quitar foto"
+                  >
+                    ✕
+                  </button>
+
+                  {/* make-cover — always visible for non-cover photos */}
+                  {!isCover && (
                     <button
                       type="button"
                       onClick={() =>
                         setCover(it.kind === 'existing' ? { kind: 'existing', id: it.id } : { kind: 'new', uid: it.uid })
                       }
-                      className="absolute inset-x-1 bottom-1 z-10 rounded bg-black/60 px-1.5 py-1 text-[10px] font-medium text-white opacity-0 transition hover:bg-black/80 group-hover:opacity-100"
+                      className="absolute inset-x-0 bottom-0 z-10 bg-black/60 py-1.5 text-[11px] font-medium text-white transition hover:bg-blue-600"
                     >
-                      Hacer portada
+                      ★ Hacer portada
                     </button>
                   )}
-
-                  {isNew && (
-                    <span className="absolute bottom-1 right-1 rounded bg-green-600 px-1.5 py-0.5 text-[10px] text-white group-hover:opacity-0">
-                      Nueva
-                    </span>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => (it.kind === 'existing' ? deleteExisting(it.id) : removeNew(it.uid))}
-                    className="absolute right-1 top-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-xs text-white opacity-0 transition group-hover:opacity-100"
-                    aria-label="Quitar foto"
-                  >
-                    ✕
-                  </button>
                 </div>
               );
             })}

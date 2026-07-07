@@ -70,85 +70,71 @@ export default function AdminCars({ cars }: Props) {
           Todavía no hay coches. Pulsa <span className="font-medium">“Añadir coche”</span> para empezar.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-slate-500">
-              <tr>
-                <th className="p-3 font-medium">Coche</th>
-                <th className="p-3 font-medium">Precio/día</th>
-                <th className="p-3 font-medium">Km</th>
-                <th className="p-3 font-medium">Estado</th>
-                <th className="p-3 text-right font-medium">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {cars.map((car) => (
-                <tr key={car.id}>
-                  <td className="p-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-16 shrink-0 overflow-hidden rounded bg-slate-100">
-                        {car.imageUrl ? (
-                          <img src={car.imageUrl} alt={car.title} className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-slate-300">🚗</div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium">{car.title}</p>
-                        {car.brand && <p className="text-xs text-slate-400">{car.brand}</p>}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-3">{priceFmt.format(Number(car.pricePerDay))}</td>
-                  <td className="p-3">
+        <div className="space-y-3">
+          {cars.map((car) => (
+            <div
+              key={car.id}
+              className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:p-4"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                  {car.imageUrl ? (
+                    <img src={car.imageUrl} alt={car.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-slate-300">🚗</div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{car.title}</p>
+                  {car.brand && <p className="text-xs text-slate-400">{car.brand}</p>}
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    <span className="font-semibold text-slate-700">{priceFmt.format(Number(car.pricePerDay))}/día</span>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs ${
+                      className={`rounded-full px-2 py-0.5 text-[11px] ${
                         car.kmUnlimited ?? true ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                       }`}
                     >
                       {kmLabel(car)}
                     </span>
-                  </td>
-                  <td className="p-3">
                     {car.available ? (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">Disponible</span>
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-[11px] text-green-700">Disponible</span>
                     ) : (
-                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-600">Oculto</span>
+                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] text-slate-600">Oculto</span>
                     )}
-                  </td>
-                  <td className="p-3">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openEdit(car)}
-                        className="rounded border border-slate-300 px-2.5 py-1 text-xs hover:bg-slate-50"
-                      >
-                        Editar
-                      </button>
-                      <form method="post" action="/api/cars/toggle">
-                        <input type="hidden" name="id" value={car.id} />
-                        <button className="rounded border border-slate-300 px-2.5 py-1 text-xs hover:bg-slate-50">
-                          {car.available ? 'Ocultar' : 'Mostrar'}
-                        </button>
-                      </form>
-                      <form
-                        method="post"
-                        action="/api/cars/delete"
-                        onSubmit={(e) => {
-                          if (!confirm('¿Eliminar este coche?')) e.preventDefault();
-                        }}
-                      >
-                        <input type="hidden" name="id" value={car.id} />
-                        <button className="rounded border border-red-200 px-2.5 py-1 text-xs text-red-600 hover:bg-red-50">
-                          Eliminar
-                        </button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2 sm:ml-auto sm:shrink-0">
+                <button
+                  type="button"
+                  onClick={() => openEdit(car)}
+                  className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-700 sm:flex-none"
+                >
+                  Editar
+                </button>
+                <form method="post" action="/api/cars/toggle" className="flex-1 sm:flex-none">
+                  <input type="hidden" name="id" value={car.id} />
+                  <button className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50">
+                    {car.available ? 'Ocultar' : 'Mostrar'}
+                  </button>
+                </form>
+                <form
+                  method="post"
+                  action="/api/cars/delete"
+                  className="flex-1 sm:flex-none"
+                  onSubmit={(e) => {
+                    if (!confirm('¿Eliminar este coche?')) e.preventDefault();
+                  }}
+                >
+                  <input type="hidden" name="id" value={car.id} />
+                  <button className="w-full rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                    Eliminar
+                  </button>
+                </form>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
