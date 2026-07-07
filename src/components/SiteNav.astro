@@ -17,13 +17,13 @@ const options = [
 const current = options.find((o) => o.code === lang)!;
 ---
 
-<header class="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
-  <a href={localizedPath(lang, '/')} class="fade-in">
-    <span class="block font-display text-2xl font-semibold leading-none tracking-tight">Luxoria</span>
-    <span class="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.5em] text-gold">Drive</span>
+<header class="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 sm:py-6 lg:px-10">
+  <a href={localizedPath(lang, '/')} class="fade-in shrink-0">
+    <span class="block font-display text-xl font-semibold leading-none tracking-tight sm:text-2xl">Luxoria</span>
+    <span class="mt-0.5 block text-[9px] font-medium uppercase tracking-[0.4em] text-gold sm:text-[10px] sm:tracking-[0.5em]">Drive</span>
   </a>
 
-  <div class="flex items-center gap-4">
+  <div class="flex items-center gap-2 sm:gap-4">
     <span class="hidden text-xs uppercase tracking-[0.3em] text-taupe lg:inline">
       {t('nav.location')}
     </span>
@@ -31,10 +31,10 @@ const current = options.find((o) => o.code === lang)!;
     <!-- Language selector -->
     <details class="lang-switch group relative">
       <summary
-        class="flex cursor-pointer list-none items-center gap-2 rounded-full border border-cream/15 px-3 py-2 text-sm text-cream transition hover:border-gold/50 [&::-webkit-details-marker]:hidden"
+        class="flex cursor-pointer list-none items-center gap-1.5 rounded-full border border-cream/15 px-2.5 py-2 text-xs text-cream transition hover:border-gold/50 sm:gap-2 sm:px-3 sm:text-sm [&::-webkit-details-marker]:hidden"
         aria-label="Language"
       >
-        <span class="text-base leading-none">{current.flag}</span>
+        <span class="text-sm leading-none sm:text-base">{current.flag}</span>
         <span class="font-medium uppercase tracking-wider">{current.code}</span>
         <svg class="h-3 w-3 text-taupe transition group-open:rotate-180" viewBox="0 0 12 8" fill="none" aria-hidden="true">
           <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -62,10 +62,15 @@ const current = options.find((o) => o.code === lang)!;
 
     <a
       href={webSiteConfig.phoneHref}
-      class="group inline-flex items-center gap-2 rounded-full border border-cream/15 px-4 py-2 text-sm text-cream transition hover:border-gold/50 hover:text-gold"
+      aria-label={`Llamar ${webSiteConfig.phone}`}
+      class="group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-cream/15 px-2.5 py-2 text-cream transition hover:border-gold/50 hover:text-gold sm:gap-2 sm:px-4"
     >
-      <span class="h-1.5 w-1.5 rounded-full bg-gold transition group-hover:scale-150"></span>
-      {webSiteConfig.phone}
+      <svg class="h-3.5 w-3.5 shrink-0 text-gold sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path
+          d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.21z"
+        ></path>
+      </svg>
+      <span class="whitespace-nowrap text-[11px] tracking-tight sm:text-sm sm:tracking-normal">{webSiteConfig.phone}</span>
     </a>
   </div>
 </header>
