@@ -28,14 +28,23 @@ const year = new Date().getFullYear();
     >
       {webSiteConfig.phone}
     </a>
+    <a
+      href={webSiteConfig.emailHref}
+      class="mt-4 inline-block text-sm uppercase tracking-widest text-taupe transition hover:text-gold"
+    >
+      {webSiteConfig.email}
+    </a>
 
     <div class="mt-20 flex flex-col items-center justify-between gap-6 border-t border-cream/10 pt-10 text-sm text-taupe sm:flex-row sm:text-left">
       <div>
-        <span class="font-display text-lg text-cream">Luxoria Drive</span>
+        <span class="font-display text-lg text-cream">{webSiteConfig.name}</span>
         <p class="mt-1 text-xs">{company.fullAddress}</p>
+        <a href={webSiteConfig.emailHref} class="mt-1 inline-block text-xs transition hover:text-gold">
+          {webSiteConfig.email}
+        </a>
       </div>
       <div class="flex items-center gap-6 text-xs uppercase tracking-widest">
-        <span>&copy; {year} Luxoria Drive</span>
+        <span>&copy; {year} {webSiteConfig.name}</span>
         <a href="/admin" class="text-taupe/50 transition hover:text-gold">{t('footer.admin')}</a>
       </div>
     </div>

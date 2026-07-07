@@ -1,4 +1,5 @@
 import nodemailer, { type Transporter } from 'nodemailer';
+import { webSiteConfig } from '../config/webSiteConfig';
 
 let transporter: Transporter | null = null;
 
@@ -44,8 +45,9 @@ export async function sendBookingEmail(b: BookingMail): Promise<boolean> {
     return false;
   }
 
-  const to = process.env.MAIL_TO || process.env.SMTP_USER || '';
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER || '';
+  const to = process.env.MAIL_TO || process.env.SMTP_USER || webSiteConfig.email;
+  const from =
+    process.env.SMTP_FROM || process.env.SMTP_USER || `${webSiteConfig.name} <${webSiteConfig.email}>`;
   if (!to || !from) {
     console.warn('[mail] MAIL_TO / SMTP_FROM missing — skipping booking email');
     return false;

@@ -3,6 +3,8 @@ export const webSiteConfig = {
   url: 'https://luxoriadrive.com',
   phone: '+34 692 17 20 15',
   phoneHref: 'tel:+34692172015',
+  email: 'contact@luxoriadrive.com',
+  emailHref: 'mailto:contact@luxoriadrive.com',
   company: {
     name: 'Luxoria Drive',
     address: {
