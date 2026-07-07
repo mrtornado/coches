@@ -44,9 +44,9 @@ Works with AWS S3 (leave `S3_ENDPOINT` blank), Cloudflare R2, or MinIO (`S3_FORC
 
 ## Deploy on Coolify
 
-1. Push this repo to Git and create a new **Application** in Coolify pointing at it. Coolify (Nixpacks) detects Astro and builds it automatically — no Dockerfile needed.
-   - Build command: `npm run build`
-   - Start command: `npm run start`
+1. Push this repo to Git and create a new **Application** in Coolify pointing at it.
+   - **Build Pack: Dockerfile** (recommended). The included `Dockerfile` pins Node 22 LTS. Nixpacks' bundled Node is `22.11.0`, one patch below Astro's required `>=22.12.0`, so the Nixpacks build fails — the Dockerfile avoids that entirely.
+   - _Alternative, if you insist on Nixpacks:_ set a **build-time** env var `NIXPACKS_NODE_VERSION=24` (or `23`) so it uses a Node new enough for Astro.
 2. **Port:** the server binds to `0.0.0.0:8080` by default. Set Coolify's **Ports Exposes** to `8080` (or set a `PORT` env var and expose the same value). You do **not** need a `HOST` env var.
 3. Add a **Postgres** resource in Coolify and copy its connection string into `DATABASE_URL`. Set `DATABASE_SSL=true` if required.
 4. Set the env vars in the app's **Environment** tab (see list below).

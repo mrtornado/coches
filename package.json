@@ -3,6 +3,9 @@
   "type": "module",
   "version": "1.0.0",
   "description": "Lightest MVP rent-a-car listing with admin (Astro + Postgres + S3)",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
