@@ -190,8 +190,8 @@ const fieldClass =
                       </label>
                     </div>
                     <label class="block">
-                      <span class="text-xs uppercase tracking-widest text-taupe">{t('book.email')}</span>
-                      <input name="email" type="email" class={fieldClass} />
+                      <span class="text-xs uppercase tracking-widest text-taupe">{t('book.email')} *</span>
+                      <input name="email" type="email" required class={fieldClass} />
                     </label>
                     <BookingDates client:load lang={lang} />
                     <label class="block">

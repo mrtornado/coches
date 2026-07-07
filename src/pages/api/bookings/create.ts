@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
+import { eq } from 'drizzle-orm';
 import { db, schema } from '../../../lib/db';
 import { bookingFormSchema } from '../../../lib/db/schema';
+import { sendBookingEmail } from '../../../lib/mailer';
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   const form = await request.formData();
@@ -27,10 +29,27 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     carId: data.carId,
     name: data.name,
     phone: data.phone,
-    email: data.email || null,
+    email: data.email,
     startDate: data.startDate || null,
     endDate: data.endDate || null,
     message: data.message || null,
+  });
+
+  // Notify the business by email (best-effort — never blocks the booking).
+  const carRows = await db
+    .select({ title: schema.cars.title })
+    .from(schema.cars)
+    .where(eq(schema.cars.id, data.carId))
+    .limit(1);
+  await sendBookingEmail({
+    carTitle: carRows[0]?.title ?? `#${data.carId}`,
+    carId: data.carId,
+    name: data.name,
+    phone: data.phone,
+    email: data.email,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    message: data.message,
   });
 
   return redirect(`${prefix}/car/${data.carId}?ok=1`);

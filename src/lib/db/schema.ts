@@ -79,7 +79,7 @@ export const bookingFormSchema = z.object({
   carId: z.coerce.number().int().positive(),
   name: z.string().trim().min(1, 'El nombre es obligatorio'),
   phone: z.string().trim().min(3, 'El teléfono es obligatorio'),
-  email: z.string().email().optional().or(z.literal('')),
+  email: z.string().trim().email('El email es obligatorio'),
   startDate: z.string().optional().or(z.literal('')),
   endDate: z.string().optional().or(z.literal('')),
   message: z.string().optional().or(z.literal('')),
