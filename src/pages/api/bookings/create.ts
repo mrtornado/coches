@@ -14,9 +14,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     message: form.get('message'),
   });
 
+  const lang = form.get('lang') === 'en' ? 'en' : 'es';
+  const prefix = lang === 'en' ? '/en' : '';
+
   if (!parsed.success) {
     const carId = Number(form.get('carId'));
-    return redirect(Number.isInteger(carId) ? `/car/${carId}?error=1` : '/');
+    return redirect(Number.isInteger(carId) ? `${prefix}/car/${carId}?error=1` : `${prefix}/`);
   }
   const data = parsed.data;
 
@@ -30,5 +33,5 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     message: data.message || null,
   });
 
-  return redirect(`/car/${data.carId}?ok=1`);
+  return redirect(`${prefix}/car/${data.carId}?ok=1`);
 };

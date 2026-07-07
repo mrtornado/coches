@@ -1,10 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 
-const MONTHS = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-];
-const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+type Lang = 'es' | 'en';
+
+const MONTHS: Record<Lang, string[]> = {
+  es: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+};
+const WEEKDAYS: Record<Lang, string[]> = {
+  es: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
+  en: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+};
+const LABELS: Record<Lang, { pickup: string; ret: string; choose: string; clear: string; done: string }> = {
+  es: { pickup: 'Recogida', ret: 'Devolución', choose: 'Elegir fecha', clear: 'Limpiar', done: 'Listo' },
+  en: { pickup: 'Pick-up', ret: 'Return', choose: 'Choose date', clear: 'Clear', done: 'Done' },
+};
 
 function iso(d: Date): string {
   const y = d.getFullYear();
@@ -19,15 +28,16 @@ function todayMidnight(): Date {
   return d;
 }
 
-function pretty(isoStr: string): string {
+function pretty(isoStr: string, lang: Lang): string {
   const [y, m, d] = isoStr.split('-').map(Number);
-  return `${String(d).padStart(2, '0')} ${MONTHS[m - 1].slice(0, 3).toLowerCase()} ${y}`;
+  return `${String(d).padStart(2, '0')} ${MONTHS[lang][m - 1].slice(0, 3).toLowerCase()} ${y}`;
 }
 
 const triggerClass =
   'mt-1 w-full rounded-sm border px-3 py-2.5 text-left text-sm transition focus:outline-none';
 
-export default function BookingDates() {
+export default function BookingDates({ lang = 'es' }: { lang?: Lang }) {
+  const L = LABELS[lang];
   const [open, setOpen] = useState(false);
   const [start, setStart] = useState<string | null>(null);
   const [end, setEnd] = useState<string | null>(null);
@@ -63,7 +73,6 @@ export default function BookingDates() {
     }
   }
 
-  // Build the month grid
   const y = view.getFullYear();
   const m = view.getMonth();
   const firstWeekday = (new Date(y, m, 1).getDay() + 6) % 7; // Mon = 0
@@ -81,25 +90,23 @@ export default function BookingDates() {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <span className="text-xs uppercase tracking-widest text-taupe">Recogida</span>
+          <span className="text-xs uppercase tracking-widest text-taupe">{L.pickup}</span>
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className={`${triggerClass} ${
-              open && !start ? 'border-gold/60' : 'border-cream/15'
-            } bg-ink ${start ? 'text-cream' : 'text-taupe/60'}`}
+            className={`${triggerClass} ${open && !start ? 'border-gold/60' : 'border-cream/15'} bg-ink ${start ? 'text-cream' : 'text-taupe/60'}`}
           >
-            {start ? pretty(start) : 'Elegir fecha'}
+            {start ? pretty(start, lang) : L.choose}
           </button>
         </div>
         <div>
-          <span className="text-xs uppercase tracking-widest text-taupe">Devolución</span>
+          <span className="text-xs uppercase tracking-widest text-taupe">{L.ret}</span>
           <button
             type="button"
             onClick={() => setOpen(true)}
             className={`${triggerClass} border-cream/15 bg-ink ${end ? 'text-cream' : 'text-taupe/60'}`}
           >
-            {end ? pretty(end) : 'Elegir fecha'}
+            {end ? pretty(end, lang) : L.choose}
           </button>
         </div>
       </div>
@@ -112,26 +119,26 @@ export default function BookingDates() {
               disabled={!canGoPrev}
               onClick={() => setView(new Date(y, m - 1, 1))}
               className="flex h-8 w-8 items-center justify-center rounded-full text-cream transition hover:bg-cream/10 disabled:opacity-25"
-              aria-label="Mes anterior"
+              aria-label="Prev"
             >
               ‹
             </button>
             <span className="font-display text-lg">
-              {MONTHS[m]} {y}
+              {MONTHS[lang][m]} {y}
             </span>
             <button
               type="button"
               onClick={() => setView(new Date(y, m + 1, 1))}
               className="flex h-8 w-8 items-center justify-center rounded-full text-cream transition hover:bg-cream/10"
-              aria-label="Mes siguiente"
+              aria-label="Next"
             >
               ›
             </button>
           </div>
 
           <div className="grid grid-cols-7 gap-1 text-center">
-            {WEEKDAYS.map((w) => (
-              <span key={w} className="py-1 text-[10px] uppercase tracking-widest text-taupe/60">
+            {WEEKDAYS[lang].map((w, i) => (
+              <span key={i} className="py-1 text-[10px] uppercase tracking-widest text-taupe/60">
                 {w}
               </span>
             ))}
@@ -152,9 +159,7 @@ export default function BookingDates() {
                   onClick={() => pickDay(cell)}
                   className={`h-9 rounded-sm text-sm transition ${
                     disabled ? 'cursor-not-allowed text-cream/15' : 'text-cream hover:bg-gold/20'
-                  } ${selected ? 'bg-gold font-semibold text-ink hover:bg-gold' : ''} ${
-                    inRange ? 'bg-gold/15' : ''
-                  }`}
+                  } ${selected ? 'bg-gold font-semibold text-ink hover:bg-gold' : ''} ${inRange ? 'bg-gold/15' : ''}`}
                 >
                   {dayNum}
                 </button>
@@ -171,14 +176,14 @@ export default function BookingDates() {
               }}
               className="text-xs uppercase tracking-widest text-taupe transition hover:text-cream"
             >
-              Limpiar
+              {L.clear}
             </button>
             <button
               type="button"
               onClick={() => setOpen(false)}
               className="rounded-sm bg-gold px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-ink transition hover:bg-gold-light"
             >
-              Listo
+              {L.done}
             </button>
           </div>
         </div>

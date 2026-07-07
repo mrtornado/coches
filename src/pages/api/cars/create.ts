@@ -18,6 +18,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     kmUnlimited: form.get('kmUnlimited') || undefined,
     kmPerDay: form.get('kmPerDay') || undefined,
     description: form.get('description'),
+    descriptionEn: form.get('descriptionEn'),
   });
 
   if (!parsed.success) {
@@ -54,6 +55,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       kmUnlimited: data.kmUnlimited,
       kmPerDay: data.kmUnlimited ? null : (data.kmPerDay ?? null),
       description: data.description || null,
+      descriptionEn: data.descriptionEn || null,
       imageUrl: cover?.url ?? null,
       imageKey: cover?.key ?? null,
     })

@@ -22,6 +22,7 @@ export const cars = pgTable('cars', {
   kmUnlimited: boolean('km_unlimited').notNull().default(true),
   kmPerDay: integer('km_per_day'),
   description: text('description'),
+  descriptionEn: text('description_en'),
   imageUrl: text('image_url'),
   imageKey: text('image_key'),
   available: boolean('available').notNull().default(true),
@@ -59,7 +60,7 @@ export type Booking = typeof bookings.$inferSelect;
 const carInsert = createInsertSchema(cars);
 
 export const carFormSchema = carInsert
-  .pick({ title: true, brand: true, fuel: true, description: true })
+  .pick({ title: true, brand: true, fuel: true, description: true, descriptionEn: true })
   .extend({
     title: z.string().trim().min(1, 'El título es obligatorio'),
     pricePerDay: z.coerce.number().positive('El precio debe ser mayor que 0'),

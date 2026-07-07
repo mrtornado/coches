@@ -1,26 +1,38 @@
 ---
 import '../styles/global.css';
 import { webSiteConfig } from '../config/webSiteConfig';
+import type { Lang } from '../i18n/ui';
 
 interface Props {
   title?: string;
   /** false = render only the slot (page owns its own header/footer) */
   chrome?: boolean;
   theme?: 'light' | 'dark';
+  htmlLang?: Lang;
+  /** locale-neutral path (e.g. "/car/3") — enables hreflang alternates */
+  path?: string;
 }
-const { title = webSiteConfig.name, chrome = true, theme = 'light' } = Astro.props;
+const { title = webSiteConfig.name, chrome = true, theme = 'light', htmlLang = 'es', path } = Astro.props;
 const bodyClass =
   theme === 'dark'
     ? 'min-h-full bg-ink text-cream antialiased'
     : 'min-h-full bg-slate-50 text-slate-900 antialiased flex flex-col';
+
+const base = webSiteConfig.url.replace(/\/$/, '');
+const clean = path === '/' ? '' : path;
+const esUrl = path != null ? `${base}${clean}` : null;
+const enUrl = path != null ? `${base}/en${clean}` : null;
 ---
 
 <!doctype html>
-<html lang="es" class="h-full">
+<html lang={htmlLang} class="h-full">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    {esUrl && <link rel="alternate" hreflang="es" href={esUrl} />}
+    {enUrl && <link rel="alternate" hreflang="en" href={enUrl} />}
+    {esUrl && <link rel="alternate" hreflang="x-default" href={esUrl} />}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

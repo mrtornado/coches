@@ -14,6 +14,7 @@ export interface CarFormValues {
   kmUnlimited?: boolean | null;
   kmPerDay?: number | null;
   description?: string | null;
+  descriptionEn?: string | null;
 }
 
 export interface ExistingImage {
@@ -236,10 +237,20 @@ export default function CarForm({
         )}
       </div>
 
-      <label className="block">
-        <span className="text-sm font-medium text-slate-700">Descripción</span>
-        <textarea name="description" rows={3} defaultValue={car?.description ?? ''} className={inputClass} />
-      </label>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="text-sm font-medium text-slate-700">
+            Descripción <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">ES</span>
+          </span>
+          <textarea name="description" rows={4} defaultValue={car?.description ?? ''} placeholder="Descripción en español…" className={inputClass} />
+        </label>
+        <label className="block">
+          <span className="text-sm font-medium text-slate-700">
+            Descripción <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-600">EN</span>
+          </span>
+          <textarea name="descriptionEn" rows={4} defaultValue={car?.descriptionEn ?? ''} placeholder="Description in English…" className={inputClass} />
+        </label>
+      </div>
 
       {/* ---- Photos: drag & drop + cover selection ---- */}
       <div>

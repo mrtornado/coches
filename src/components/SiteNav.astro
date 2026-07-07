@@ -1,16 +1,65 @@
 ---
 import { webSiteConfig } from '../config/webSiteConfig';
+import { useTranslations, localizedPath, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** locale-neutral path, e.g. "/" or "/car/3" */
+  path: string;
+}
+const { lang, path } = Astro.props;
+const t = useTranslations(lang);
+
+const options = [
+  { code: 'es' as Lang, flag: '🇪🇸', name: 'Español', href: localizedPath('es', path) },
+  { code: 'en' as Lang, flag: '🇬🇧', name: 'English', href: localizedPath('en', path) },
+];
+const current = options.find((o) => o.code === lang)!;
 ---
 
 <header class="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
-  <a href="/" class="fade-in">
+  <a href={localizedPath(lang, '/')} class="fade-in">
     <span class="block font-display text-2xl font-semibold leading-none tracking-tight">Luxoria</span>
     <span class="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.5em] text-gold">Drive</span>
   </a>
-  <div class="flex items-center gap-6">
-    <span class="hidden text-xs uppercase tracking-[0.3em] text-taupe sm:inline">
-      Benidorm · Costa Blanca
+
+  <div class="flex items-center gap-4">
+    <span class="hidden text-xs uppercase tracking-[0.3em] text-taupe lg:inline">
+      {t('nav.location')}
     </span>
+
+    <!-- Language selector -->
+    <details class="lang-switch group relative">
+      <summary
+        class="flex cursor-pointer list-none items-center gap-2 rounded-full border border-cream/15 px-3 py-2 text-sm text-cream transition hover:border-gold/50 [&::-webkit-details-marker]:hidden"
+        aria-label="Language"
+      >
+        <span class="text-base leading-none">{current.flag}</span>
+        <span class="font-medium uppercase tracking-wider">{current.code}</span>
+        <svg class="h-3 w-3 text-taupe transition group-open:rotate-180" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+          <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </summary>
+
+      <div class="absolute right-0 z-40 mt-2 w-44 overflow-hidden rounded-sm border border-cream/15 bg-ink-raise p-1 shadow-2xl shadow-black/50">
+        {
+          options.map((o) => (
+            <a
+              href={o.href}
+              class={`flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm transition hover:bg-cream/5 ${
+                o.code === lang ? 'text-gold' : 'text-cream'
+              }`}
+              aria-current={o.code === lang ? 'true' : undefined}
+            >
+              <span class="text-base leading-none">{o.flag}</span>
+              <span class="flex-1">{o.name}</span>
+              {o.code === lang && <span class="text-gold">✓</span>}
+            </a>
+          ))
+        }
+      </div>
+    </details>
+
     <a
       href={webSiteConfig.phoneHref}
       class="group inline-flex items-center gap-2 rounded-full border border-cream/15 px-4 py-2 text-sm text-cream transition hover:border-gold/50 hover:text-gold"
@@ -20,3 +69,12 @@ import { webSiteConfig } from '../config/webSiteConfig';
     </a>
   </div>
 </header>
+
+<script is:inline>
+  // Close the language dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('details.lang-switch[open]').forEach((d) => {
+      if (!d.contains(e.target)) d.removeAttribute('open');
+    });
+  });
+</script>

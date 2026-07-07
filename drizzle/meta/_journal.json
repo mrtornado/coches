@@ -22,6 +22,13 @@
       "when": 1783435209842,
       "tag": "0002_last_junta",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783437321127,
+      "tag": "0003_cool_darkstar",
+      "breakpoints": true
     }
   ]
 }
