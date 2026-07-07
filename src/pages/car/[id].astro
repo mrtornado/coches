@@ -1,0 +1,100 @@
+---
+import { eq } from 'drizzle-orm';
+import Layout from '../../layouts/Layout.astro';
+import { db, schema } from '../../lib/db';
+
+const id = Number(Astro.params.id);
+let car = null;
+if (Number.isInteger(id) && id > 0) {
+  const rows = await db.select().from(schema.cars).where(eq(schema.cars.id, id)).limit(1);
+  car = rows[0] ?? null;
+}
+
+if (!car) {
+  return new Response('Coche no encontrado', { status: 404 });
+}
+
+const booked = Astro.url.searchParams.get('ok') === '1';
+const priceFmt = new Intl.NumberFormat('es-ES', {
+  style: 'currency',
+  currency: 'EUR',
+  maximumFractionDigits: 0,
+});
+---
+
+<Layout title={car.title}>
+  <a href="/" class="mb-6 inline-block text-sm text-slate-500 hover:text-slate-900">&larr; Volver a la flota</a>
+
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+    <div>
+      <div class="aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+        {car.imageUrl ? (
+          <img src={car.imageUrl} alt={car.title} class="h-full w-full object-cover" />
+        ) : (
+          <div class="flex h-full w-full items-center justify-center text-6xl text-slate-300">🚗</div>
+        )}
+      </div>
+      {car.description && <p class="mt-4 whitespace-pre-line text-slate-600">{car.description}</p>}
+    </div>
+
+    <div>
+      {car.brand && <p class="text-sm font-medium uppercase tracking-wide text-slate-400">{car.brand}</p>}
+      <h1 class="text-3xl font-bold tracking-tight">{car.title}</h1>
+      <p class="mt-2 text-2xl font-bold text-blue-600">
+        {priceFmt.format(Number(car.pricePerDay))} <span class="text-base font-normal text-slate-400">/ día</span>
+      </p>
+
+      <div class="mt-4 flex flex-wrap gap-2 text-sm text-slate-600">
+        {car.seats && <span class="rounded bg-slate-100 px-3 py-1">👤 {car.seats} plazas</span>}
+        {car.transmission && <span class="rounded bg-slate-100 px-3 py-1">⚙️ {car.transmission}</span>}
+        {car.fuel && <span class="rounded bg-slate-100 px-3 py-1">⛽ {car.fuel}</span>}
+      </div>
+
+      <div class="mt-8 rounded-xl border border-slate-200 bg-white p-6">
+        <h2 class="text-lg font-semibold">Solicitar reserva</h2>
+        <p class="mt-1 text-sm text-slate-500">Sin pago online. Te contactaremos para confirmar.</p>
+
+        {booked ? (
+          <div class="mt-4 rounded-lg bg-green-50 p-4 text-sm text-green-800">
+            ✅ ¡Solicitud enviada! Te contactaremos pronto.
+          </div>
+        ) : (
+          <form method="post" action="/api/bookings/create" class="mt-4 space-y-3">
+            <input type="hidden" name="carId" value={car.id} />
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label class="block">
+                <span class="text-sm text-slate-600">Nombre *</span>
+                <input name="name" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
+              </label>
+              <label class="block">
+                <span class="text-sm text-slate-600">Teléfono *</span>
+                <input name="phone" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
+              </label>
+            </div>
+            <label class="block">
+              <span class="text-sm text-slate-600">Email</span>
+              <input name="email" type="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
+            </label>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label class="block">
+                <span class="text-sm text-slate-600">Desde</span>
+                <input name="startDate" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
+              </label>
+              <label class="block">
+                <span class="text-sm text-slate-600">Hasta</span>
+                <input name="endDate" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
+              </label>
+            </div>
+            <label class="block">
+              <span class="text-sm text-slate-600">Mensaje</span>
+              <textarea name="message" rows="3" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></textarea>
+            </label>
+            <button type="submit" class="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700">
+              Enviar solicitud
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,39 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+}
+const { title = 'Alquiler de Coches' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-full bg-slate-50 text-slate-900 antialiased flex flex-col">
+    <header class="border-b border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <a href="/" class="text-xl font-bold tracking-tight">
+          🚗 <span class="text-blue-600">Rent</span>a Coches
+        </a>
+        <nav class="text-sm">
+          <a href="/admin" class="text-slate-500 hover:text-slate-900">Admin</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+      <slot />
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto max-w-6xl px-4 py-6 text-center text-sm text-slate-400">
+        &copy; {new Date().getFullYear()} Renta Coches — MVP
+      </div>
+    </footer>
+  </body>
+</html>
