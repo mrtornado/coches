@@ -1,7 +1,11 @@
 ---
-import { eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import Layout from '../../layouts/Layout.astro';
+import SiteNav from '../../components/SiteNav.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
 import { db, schema } from '../../lib/db';
+import BookingDates from '../../components/BookingDates.tsx';
+import { webSiteConfig } from '../../config/webSiteConfig';
 
 const id = Number(Astro.params.id);
 let car = null;
@@ -14,87 +18,223 @@ if (!car) {
   return new Response('Coche no encontrado', { status: 404 });
 }
 
+const images = await db
+  .select({ url: schema.carImages.url })
+  .from(schema.carImages)
+  .where(eq(schema.carImages.carId, id))
+  .orderBy(asc(schema.carImages.position), asc(schema.carImages.id));
+const gallery = images.length > 0 ? images.map((i) => i.url) : car.imageUrl ? [car.imageUrl] : [];
+
 const booked = Astro.url.searchParams.get('ok') === '1';
 const priceFmt = new Intl.NumberFormat('es-ES', {
   style: 'currency',
   currency: 'EUR',
   maximumFractionDigits: 0,
 });
+
+const { company } = webSiteConfig;
+const waNumber = webSiteConfig.phoneHref.replace(/[^0-9]/g, '');
+const waText = encodeURIComponent(
+  `Hola, me interesa el ${car.title} (${priceFmt.format(Number(car.pricePerDay))}/día). ¿Está disponible?`,
+);
+const waHref = `https://wa.me/${waNumber}?text=${waText}`;
+
+const specs = [
+  car.seats ? { label: 'Plazas', value: String(car.seats) } : null,
+  car.transmission ? { label: 'Cambio', value: car.transmission } : null,
+  car.fuel ? { label: 'Combustible', value: car.fuel } : null,
+].filter(Boolean) as { label: string; value: string }[];
+
+const fieldClass =
+  'mt-1 w-full rounded-sm border border-cream/15 bg-ink px-3 py-2.5 text-sm text-cream placeholder-taupe/50 outline-none transition focus:border-gold/60';
 ---
 
-<Layout title={car.title}>
-  <a href="/" class="mb-6 inline-block text-sm text-slate-500 hover:text-slate-900">&larr; Volver a la flota</a>
-
-  <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-    <div>
-      <div class="aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-        {car.imageUrl ? (
-          <img src={car.imageUrl} alt={car.title} class="h-full w-full object-cover" />
-        ) : (
-          <div class="flex h-full w-full items-center justify-center text-6xl text-slate-300">🚗</div>
-        )}
-      </div>
-      {car.description && <p class="mt-4 whitespace-pre-line text-slate-600">{car.description}</p>}
-    </div>
-
-    <div>
-      {car.brand && <p class="text-sm font-medium uppercase tracking-wide text-slate-400">{car.brand}</p>}
-      <h1 class="text-3xl font-bold tracking-tight">{car.title}</h1>
-      <p class="mt-2 text-2xl font-bold text-blue-600">
-        {priceFmt.format(Number(car.pricePerDay))} <span class="text-base font-normal text-slate-400">/ día</span>
-      </p>
-
-      <div class="mt-4 flex flex-wrap gap-2 text-sm text-slate-600">
-        {car.seats && <span class="rounded bg-slate-100 px-3 py-1">👤 {car.seats} plazas</span>}
-        {car.transmission && <span class="rounded bg-slate-100 px-3 py-1">⚙️ {car.transmission}</span>}
-        {car.fuel && <span class="rounded bg-slate-100 px-3 py-1">⛽ {car.fuel}</span>}
-      </div>
-
-      <div class="mt-8 rounded-xl border border-slate-200 bg-white p-6">
-        <h2 class="text-lg font-semibold">Solicitar reserva</h2>
-        <p class="mt-1 text-sm text-slate-500">Sin pago online. Te contactaremos para confirmar.</p>
-
-        {booked ? (
-          <div class="mt-4 rounded-lg bg-green-50 p-4 text-sm text-green-800">
-            ✅ ¡Solicitud enviada! Te contactaremos pronto.
-          </div>
-        ) : (
-          <form method="post" action="/api/bookings/create" class="mt-4 space-y-3">
-            <input type="hidden" name="carId" value={car.id} />
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <label class="block">
-                <span class="text-sm text-slate-600">Nombre *</span>
-                <input name="name" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
-              </label>
-              <label class="block">
-                <span class="text-sm text-slate-600">Teléfono *</span>
-                <input name="phone" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
-              </label>
-            </div>
-            <label class="block">
-              <span class="text-sm text-slate-600">Email</span>
-              <input name="email" type="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
-            </label>
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <label class="block">
-                <span class="text-sm text-slate-600">Desde</span>
-                <input name="startDate" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
-              </label>
-              <label class="block">
-                <span class="text-sm text-slate-600">Hasta</span>
-                <input name="endDate" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
-              </label>
-            </div>
-            <label class="block">
-              <span class="text-sm text-slate-600">Mensaje</span>
-              <textarea name="message" rows="3" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"></textarea>
-            </label>
-            <button type="submit" class="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700">
-              Enviar solicitud
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
+<Layout title={`${car.title} — Luxoria Drive`} chrome={false} theme="dark">
+  <div class="grain pointer-events-none fixed inset-0 z-50 opacity-[0.04] mix-blend-soft-light"></div>
+  <div
+    class="pointer-events-none fixed inset-0 -z-0"
+    style="background:radial-gradient(110% 70% at 90% -10%, rgba(201,162,78,0.14), transparent 55%);"
+  >
   </div>
+
+  <div class="relative z-10">
+    <SiteNav />
+
+    <div class="mx-auto max-w-7xl px-6 pb-24 pt-4 lg:px-10">
+      <a
+        href="/"
+        class="group inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-taupe transition hover:text-gold"
+      >
+        <span class="transition group-hover:-translate-x-1">←</span> Volver a la flota
+      </a>
+
+      <div class="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-2">
+        <!-- ===== GALLERY ===== -->
+        <div class="reveal">
+          <div class="relative overflow-hidden rounded-sm border border-cream/10 bg-ink-soft">
+            {
+              gallery.length > 0 ? (
+                <img id="mainImg" src={gallery[0]} alt={car.title} class="aspect-[4/3] w-full object-cover" />
+              ) : (
+                <div class="flex aspect-[4/3] items-center justify-center font-display text-7xl text-cream/10">
+                  Luxoria
+                </div>
+              )
+            }
+          </div>
+          {
+            gallery.length > 1 && (
+              <div class="mt-3 grid grid-cols-5 gap-2">
+                {gallery.map((url, i) => (
+                  <button
+                    type="button"
+                    data-src={url}
+                    class={`gallery-thumb aspect-square overflow-hidden rounded-sm border-2 transition ${i === 0 ? 'border-gold' : 'border-transparent hover:border-cream/30'}`}
+                  >
+                    <img src={url} alt="" class="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )
+          }
+        </div>
+
+        <!-- ===== INFO + CONTACT ===== -->
+        <div class="reveal" style="animation-delay:.12s">
+          {car.brand && <p class="text-xs uppercase tracking-[0.4em] text-gold">{car.brand}</p>}
+          <h1 class="mt-3 font-display text-5xl leading-[0.95] tracking-tight lg:text-6xl">{car.title}</h1>
+
+          <div class="mt-6 flex items-baseline gap-2">
+            <span class="font-display text-4xl text-gold">{priceFmt.format(Number(car.pricePerDay))}</span>
+            <span class="text-sm text-taupe">/ día</span>
+          </div>
+          <div class="mt-3">
+            <span class="inline-block rounded-full border border-gold/30 px-3 py-1 text-[11px] uppercase tracking-widest text-gold">
+              {car.kmUnlimited ? 'Kilómetros ilimitados' : `${car.kmPerDay} km / día`}
+            </span>
+          </div>
+
+          {
+            specs.length > 0 && (
+              <div class="mt-8 grid grid-cols-3 divide-x divide-cream/10 rounded-sm border border-cream/10">
+                {specs.map((s) => (
+                  <div class="px-4 py-4 text-center">
+                    <p class="text-[10px] uppercase tracking-[0.25em] text-taupe">{s.label}</p>
+                    <p class="mt-1 font-display text-lg">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+            )
+          }
+
+          {car.description && <p class="mt-6 whitespace-pre-line leading-relaxed text-taupe">{car.description}</p>}
+
+          <!-- ===== CONTACT CARD ===== -->
+          <div class="mt-10 rounded-sm border border-cream/10 bg-ink-soft p-6 lg:p-8">
+            {
+              booked ? (
+                <div class="text-center">
+                  <p class="font-display text-2xl text-gold">¡Solicitud enviada!</p>
+                  <p class="mt-2 text-sm text-taupe">
+                    Te contactamos muy pronto para confirmar. Si tienes prisa, llámanos:
+                  </p>
+                  <a
+                    href={webSiteConfig.phoneHref}
+                    class="mt-5 inline-flex items-center gap-2 rounded-full bg-gold px-7 py-3 text-sm font-semibold uppercase tracking-widest text-ink transition hover:bg-gold-light"
+                  >
+                    {webSiteConfig.phone}
+                  </a>
+                </div>
+              ) : (
+                <>
+                  <h2 class="font-display text-2xl">Reserva este coche</h2>
+                  <p class="mt-1 text-sm text-taupe">
+                    Sin pagos online. Contacto directo — te confirmamos la disponibilidad.
+                  </p>
+
+                  <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <a
+                      href={webSiteConfig.phoneHref}
+                      class="flex items-center justify-center gap-2 rounded-sm bg-gold px-5 py-3.5 text-sm font-semibold uppercase tracking-widest text-ink transition hover:bg-gold-light"
+                    >
+                      <span>📞</span> {webSiteConfig.phone}
+                    </a>
+                    <a
+                      href={waHref}
+                      target="_blank"
+                      rel="noopener"
+                      class="flex items-center justify-center gap-2 rounded-sm border border-cream/20 px-5 py-3.5 text-sm font-semibold uppercase tracking-widest text-cream transition hover:border-gold/60 hover:text-gold"
+                    >
+                      <span>💬</span> WhatsApp
+                    </a>
+                  </div>
+
+                  <div class="my-6 flex items-center gap-4 text-[10px] uppercase tracking-[0.3em] text-taupe/60">
+                    <span class="h-px flex-1 bg-cream/10" />
+                    o déjanos tus datos
+                    <span class="h-px flex-1 bg-cream/10" />
+                  </div>
+
+                  <form method="post" action="/api/bookings/create" class="space-y-3">
+                    <input type="hidden" name="carId" value={car.id} />
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <label class="block">
+                        <span class="text-xs uppercase tracking-widest text-taupe">Nombre *</span>
+                        <input name="name" required class={fieldClass} />
+                      </label>
+                      <label class="block">
+                        <span class="text-xs uppercase tracking-widest text-taupe">Teléfono *</span>
+                        <input name="phone" required class={fieldClass} />
+                      </label>
+                    </div>
+                    <label class="block">
+                      <span class="text-xs uppercase tracking-widest text-taupe">Email</span>
+                      <input name="email" type="email" class={fieldClass} />
+                    </label>
+                    <BookingDates client:load />
+                    <label class="block">
+                      <span class="text-xs uppercase tracking-widest text-taupe">Mensaje</span>
+                      <textarea name="message" rows="3" class={fieldClass} />
+                    </label>
+                    <button
+                      type="submit"
+                      class="w-full rounded-sm bg-cream px-5 py-3 text-sm font-semibold uppercase tracking-widest text-ink transition hover:bg-gold-light"
+                    >
+                      Enviar solicitud
+                    </button>
+                  </form>
+                </>
+              )
+            }
+
+            <div class="mt-6 flex items-start gap-2 border-t border-cream/10 pt-5 text-xs text-taupe">
+              <span class="text-gold">📍</span>
+              <span>Recogida en {company.address.street}, {company.address.city} ({company.address.province})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <SiteFooter />
+  </div>
+
+  <script is:inline>
+    (() => {
+      const main = document.getElementById('mainImg');
+      const thumbs = document.querySelectorAll('.gallery-thumb');
+      thumbs.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const src = btn.getAttribute('data-src');
+          if (src && main) main.setAttribute('src', src);
+          thumbs.forEach((b) => {
+            b.classList.remove('border-gold');
+            b.classList.add('border-transparent');
+          });
+          btn.classList.remove('border-transparent');
+          btn.classList.add('border-gold');
+        });
+      });
+    })();
+  </script>
 </Layout>

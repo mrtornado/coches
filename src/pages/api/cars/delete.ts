@@ -13,9 +13,21 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
   const rows = await db.select().from(schema.cars).where(eq(schema.cars.id, id)).limit(1);
   const car = rows[0];
-  if (car) {
-    await db.delete(schema.cars).where(eq(schema.cars.id, id));
-    await deleteImage(car.imageKey);
+  if (!car) return redirect('/admin');
+
+  // Collect every S3 object for this car (gallery + legacy cover), de-duped
+  const images = await db
+    .select({ key: schema.carImages.key })
+    .from(schema.carImages)
+    .where(eq(schema.carImages.carId, id));
+  const keys = new Set<string>();
+  for (const img of images) if (img.key) keys.add(img.key);
+  if (car.imageKey) keys.add(car.imageKey);
+
+  // Delete the car first (cascades car_images rows), then the objects
+  await db.delete(schema.cars).where(eq(schema.cars.id, id));
+  for (const key of keys) {
+    await deleteImage(key);
   }
 
   return redirect('/admin');

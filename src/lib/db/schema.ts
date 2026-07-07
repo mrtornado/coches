@@ -19,10 +19,23 @@ export const cars = pgTable('cars', {
   seats: integer('seats'),
   transmission: text('transmission'),
   fuel: text('fuel'),
+  kmUnlimited: boolean('km_unlimited').notNull().default(true),
+  kmPerDay: integer('km_per_day'),
   description: text('description'),
   imageUrl: text('image_url'),
   imageKey: text('image_key'),
   available: boolean('available').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const carImages = pgTable('car_images', {
+  id: serial('id').primaryKey(),
+  carId: integer('car_id')
+    .notNull()
+    .references(() => cars.id, { onDelete: 'cascade' }),
+  url: text('url').notNull(),
+  key: text('key'),
+  position: integer('position').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -39,6 +52,7 @@ export const bookings = pgTable('bookings', {
 });
 
 export type Car = typeof cars.$inferSelect;
+export type CarImage = typeof carImages.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
 
 // --- Validation (drizzle-zod base + form-friendly coercion) ---
@@ -51,6 +65,11 @@ export const carFormSchema = carInsert
     pricePerDay: z.coerce.number().positive('El precio debe ser mayor que 0'),
     seats: z.coerce.number().int().positive().max(99).optional(),
     transmission: z.enum(['Manual', 'Automático']).optional(),
+    kmUnlimited: z
+      .enum(['true', 'false'])
+      .default('true')
+      .transform((v) => v === 'true'),
+    kmPerDay: z.coerce.number().int().positive().max(100000).optional(),
   });
 
 export type CarFormInput = z.infer<typeof carFormSchema>;

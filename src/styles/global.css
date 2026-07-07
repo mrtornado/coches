@@ -1,1 +1,98 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bodoni Moda", ui-serif, Georgia, serif;
+
+  /* Luxoria palette — warm near-black + champagne gold */
+  --color-ink: #0b0a08;
+  --color-ink-soft: #14110d;
+  --color-ink-raise: #1c1811;
+  --color-cream: #f4efe6;
+  --color-taupe: #a99f8d;
+  --color-gold: #c9a24e;
+  --color-gold-light: #e7cf97;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Interactive elements show the pointer (hand) cursor */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  select,
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+/* ---- Page-load choreography ---- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes lineGrow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.reveal {
+  animation: rise 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.fade-in {
+  animation: fade 1.6s ease both;
+}
+.line-grow {
+  transform-origin: left;
+  animation: lineGrow 1.1s cubic-bezier(0.7, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .fade-in,
+  .line-grow,
+  .marquee-track {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ---- Details ---- */
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.marquee-track {
+  animation: marquee 34s linear infinite;
+}
+
+.text-stroke-gold {
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--color-gold) 55%, transparent);
+  color: transparent;
+}

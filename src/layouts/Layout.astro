@@ -1,10 +1,18 @@
 ---
 import '../styles/global.css';
+import { webSiteConfig } from '../config/webSiteConfig';
 
 interface Props {
   title?: string;
+  /** false = render only the slot (page owns its own header/footer) */
+  chrome?: boolean;
+  theme?: 'light' | 'dark';
 }
-const { title = 'Alquiler de Coches' } = Astro.props;
+const { title = webSiteConfig.name, chrome = true, theme = 'light' } = Astro.props;
+const bodyClass =
+  theme === 'dark'
+    ? 'min-h-full bg-ink text-cream antialiased'
+    : 'min-h-full bg-slate-50 text-slate-900 antialiased flex flex-col';
 ---
 
 <!doctype html>
@@ -13,27 +21,41 @@ const { title = 'Alquiler de Coches' } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..700&family=Jost:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body class="min-h-full bg-slate-50 text-slate-900 antialiased flex flex-col">
-    <header class="border-b border-slate-200 bg-white">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <a href="/" class="text-xl font-bold tracking-tight">
-          🚗 <span class="text-blue-600">Rent</span>a Coches
-        </a>
-        <nav class="text-sm">
-          <a href="/admin" class="text-slate-500 hover:text-slate-900">Admin</a>
-        </nav>
-      </div>
-    </header>
+  <body class={bodyClass}>
+    {
+      chrome ? (
+        <>
+          <header class="border-b border-slate-200 bg-white">
+            <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+              <a href="/" class="font-display text-xl font-semibold tracking-tight">
+                {webSiteConfig.name}
+              </a>
+              <nav class="text-sm">
+                <a href="/admin" class="text-slate-500 hover:text-slate-900">Admin</a>
+              </nav>
+            </div>
+          </header>
 
-    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
-      <slot />
-    </main>
+          <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+            <slot />
+          </main>
 
-    <footer class="border-t border-slate-200 bg-white">
-      <div class="mx-auto max-w-6xl px-4 py-6 text-center text-sm text-slate-400">
-        &copy; {new Date().getFullYear()} Renta Coches — MVP
-      </div>
-    </footer>
+          <footer class="border-t border-slate-200 bg-white">
+            <div class="mx-auto max-w-6xl px-4 py-6 text-center text-sm text-slate-400">
+              &copy; {new Date().getFullYear()} {webSiteConfig.name}
+            </div>
+          </footer>
+        </>
+      ) : (
+        <slot />
+      )
+    }
   </body>
 </html>

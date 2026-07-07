@@ -1,0 +1,22 @@
+---
+import { webSiteConfig } from '../config/webSiteConfig';
+---
+
+<header class="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
+  <a href="/" class="fade-in">
+    <span class="block font-display text-2xl font-semibold leading-none tracking-tight">Luxoria</span>
+    <span class="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.5em] text-gold">Drive</span>
+  </a>
+  <div class="flex items-center gap-6">
+    <span class="hidden text-xs uppercase tracking-[0.3em] text-taupe sm:inline">
+      Benidorm · Costa Blanca
+    </span>
+    <a
+      href={webSiteConfig.phoneHref}
+      class="group inline-flex items-center gap-2 rounded-full border border-cream/15 px-4 py-2 text-sm text-cream transition hover:border-gold/50 hover:text-gold"
+    >
+      <span class="h-1.5 w-1.5 rounded-full bg-gold transition group-hover:scale-150"></span>
+      {webSiteConfig.phone}
+    </a>
+  </div>
+</header>
