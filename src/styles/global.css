@@ -19,6 +19,8 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Mobile-first: never allow horizontal scroll (clip doesn't break sticky). */
+    overflow-x: clip;
   }
 
   /* Interactive elements show the pointer (hand) cursor */
