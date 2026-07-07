@@ -8,6 +8,9 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   output: 'server',
   adapter: node({ mode: 'standalone' }),
+  // Bind to 0.0.0.0 by default so the server is reachable inside a container
+  // (Coolify/Docker). No HOST env var needed. Port still overridable via PORT.
+  server: { host: true },
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
